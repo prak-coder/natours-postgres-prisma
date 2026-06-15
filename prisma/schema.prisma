@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+
+}
+
+enum Role {
+  USER
+  GUIDE
+  LEAD_GUIDE
+  ADMIN
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  photo         String   @default("default.jpg")
+  role          Role     @default(USER)
+  password      String
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationship: One user (admin/guide) can manage many tours
+  tours         Tour[]   @relation("UserTours")
+}
+
+model Tour {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  duration        Int
+  maxGroupSize    Int
+  difficulty      String   // e.g., "easy", "medium", "difficult"
+  ratingsAverage  Float    @default(4.5)
+  ratingsQuantity Int      @default(0)
+  price           Float
+  priceDiscount   Float?
+  summary         String
+  description     String?
+  imageCover      String
+  images          String[] // PostgreSQL natively supports scalar string arrays
+  startDates      DateTime[]
+  secretTour      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationship fields connecting back to the User model
+  createdByUserId Int?
+  createdBy       User?     @relation("UserTours", fields: [createdByUserId], references: [id], onDelete: Cascade)
+}
