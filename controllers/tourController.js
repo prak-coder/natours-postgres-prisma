@@ -3,7 +3,6 @@ const prisma = require("../utils/db");
 exports.getAllTours = async (req, res) => {
   try {
     const tours = await prisma.tour.findMany();
-
     res.status(200).json({
       status: "success",
       numberoftours: tours.length,
@@ -43,12 +42,12 @@ exports.getTour = async (req, res) => {
 
 exports.createTour = async (req, res) => {
   try {
-    const tour = await prisma.tour.create({ data: req.body });
+    const newTour = await prisma.tour.create({ data: req.body });
 
     res.status(200).json({
       status: "success",
       data: {
-        tour,
+        tour: newTour,
       },
     });
   } catch (error) {
