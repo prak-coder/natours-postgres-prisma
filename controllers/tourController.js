@@ -1,44 +1,35 @@
 const prisma = require("../utils/db");
+const catchAsync = require("../utils/catchAsync");
 
-exports.getAllTours = async (req, res) => {
-  try {
-    const tours = await prisma.tour.findMany();
-    res.status(200).json({
-      status: "success",
-      numberoftours: tours.length,
-      data: {
-        tours,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: error.message,
-    });
-  }
-};
+const AppError = require("../utils/appError");
 
-exports.getTour = async (req, res) => {
-  try {
-    const tour = await prisma.tour.findFirst({
-      where: {
-        id: Number(req.params.id),
-      },
-    });
-    res.status(200).json({
-      status: "success",
-      data: {
-        tour,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      message: error,
-    });
+exports.getAllTours = catchAsync(async (req, res) => {
+  const tours = await prisma.tour.findMany();
+  res.status(200).json({
+    status: "success",
+    numberoftours: tours.length,
+    data: {
+      tours,
+    },
+  });
+});
+
+exports.getTour = catchAsync(async (req, res, next) => {
+  const tour = await prisma.tour.findFirst({
+    where: {
+      id: Number(req.params.id),
+    },
+  });
+  if (!tour) {
+    return next(new AppError("no tour with that id"));
   }
-};
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour,
+    },
+  });
+});
 
 exports.createTour = async (req, res) => {
   try {
