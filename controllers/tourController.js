@@ -4,7 +4,11 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 
 exports.getAllTours = catchAsync(async (req, res, next) => {
-  const tours = await prisma.tour.findMany();
+  const queryObj = { ...req.query };
+
+  const tours = await prisma.tour.findMany({
+    where: query,
+  });
   res.status(200).json({
     status: "success",
     numberoftours: tours.length,
