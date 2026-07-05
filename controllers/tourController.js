@@ -57,13 +57,21 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     },
     data: req.body,
   });
-  if (!updatedTour) {
-    return next(new AppError("no tour with that id", 404));
-  }
+
   res.status(200).json({
     status: "success",
     tour: updatedTour,
   });
 });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {});
+exports.deleteTour = catchAsync(async (req, res, next) => {
+  const tour = await prisma.tour.delete({
+    where: {
+      id: req.params.id * 1,
+    },
+  });
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
