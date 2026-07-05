@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 
 const AppError = require("../utils/appError");
 
-exports.getAllTours = catchAsync(async (req, res) => {
+exports.getAllTours = catchAsync(async (req, res, next) => {
   const tours = await prisma.tour.findMany();
   res.status(200).json({
     status: "success",
@@ -31,7 +31,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createTour = async (req, res) => {
+exports.createTour = async (req, res, next) => {
   try {
     const newTour = await prisma.tour.create({ data: req.body });
 
@@ -49,12 +49,21 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = async (req, res) => {
-  try {
-  } catch (error) {}
-};
+exports.updateTour = catchAsync(async (req, res, next) => {
+  const id = req.params.id * 1;
+  const updatedTour = await prisma.tour.update({
+    where: {
+      id,
+    },
+    data: req.body,
+  });
+  if (!updatedTour) {
+    return next(new AppError("no tour with that id", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    tour: updatedTour,
+  });
+});
 
-exports.deleteTour = async (req, res) => {
-  try {
-  } catch (error) {}
-};
+exports.deleteTour = catchAsync(async (req, res, next) => {});
