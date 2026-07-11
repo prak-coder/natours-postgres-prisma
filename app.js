@@ -6,6 +6,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const app = express();
 //middle ware
 app.use(express.json());
+app.set("query parser", "extended");
 
 const tourRouter = require("./routes/tourRouter");
 const userRouter = require("./routes/userRouter");

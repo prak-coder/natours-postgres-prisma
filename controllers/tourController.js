@@ -3,12 +3,16 @@ const catchAsync = require("../utils/catchAsync");
 
 const AppError = require("../utils/appError");
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const queryObj = { ...req.query };
+const PrismaAPIFeatures = require("../utils/PrismaAPIFeatures");
 
-  const tours = await prisma.tour.findMany({
-    where: query,
-  });
+exports.getAllTours = catchAsync(async (req, res, next) => {
+  const features = new PrismaAPIFeatures(req.query)
+    .filter()
+    .limitFields()
+    .sort()
+    .paginate();
+  const tours = await prisma.tour.findMany(features.queryArgs);
+
   res.status(200).json({
     status: "success",
     numberoftours: tours.length,
