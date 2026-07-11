@@ -133,3 +133,57 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
     data: tourStats,
   });
 });
+
+exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
+  const year = req.params.year * 1;
+
+  // Create exact start and end limits using UTC boundaries
+  const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+  const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
+
+  // 1. Fetch all tours with their names and start dates
+  const tours = await prisma.tour.findMany({
+    select: {
+      name: true,
+      startDates: true,
+    },
+  });
+
+  const flattenedPlans = [];
+
+  // 2. Replicate MongoDB's $unwind and $match filters manually
+  tours.forEach((tour) => {
+    if (!tour.startDates) return;
+
+    tour.startDates.forEach((dateInput) => {
+      const date = new Date(dateInput);
+
+      // Keep only array elements that fall within your target year window
+      if (date >= startDate && date <= endDate) {
+        const month = date.getUTCMonth() + 1; // getUTCMonth is 0-indexed (0 = January)
+        flattenedPlans.push({ month, name: tour.name });
+      }
+    });
+  });
+
+  // 3. Replicate MongoDB's $group step
+  const groupedObj = flattenedPlans.reduce((acc, curr) => {
+    if (!acc[curr.month]) {
+      acc[curr.month] = { month: curr.month, numTourStarts: 0, tours: [] };
+    }
+    acc[curr.month].numTourStarts += 1;
+    acc[curr.month].tours.push(curr.name);
+    return acc;
+  }, {});
+
+  // 4. Replicate MongoDB's $sort pipeline stage (Descending by start count)
+  const plan = Object.values(groupedObj).sort(
+    (a, b) => b.numTourStarts - a.numTourStarts,
+  );
+
+  // 5. Send successful structured response payload
+  res.status(200).json({
+    status: "success",
+    data: plan,
+  });
+});
