@@ -6,6 +6,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const app = express();
 //middle ware
 app.use(express.json());
+//to send query as objects { difficulty: 'easy', price: { gt: '500' }, sort: 'price' }
 app.set("query parser", "extended");
 
 const tourRouter = require("./routes/tourRouter");
