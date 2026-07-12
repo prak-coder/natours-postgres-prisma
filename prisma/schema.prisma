@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
 
 enum Role {
@@ -15,28 +14,28 @@ enum Role {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
-  photo         String   @default("default.jpg")
-  role          Role     @default(USER)
-  password      String
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  photo     String   @default("default.jpg")
+  role      Role     @default(USER)
+  password  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationship: One user (admin/guide) can manage many tours
-  tours         Tour[]   @relation("UserTours")
+  tours Tour[] @relation("UserTours")
 }
 
 model Tour {
-  id              Int      @id @default(autoincrement())
-  name            String   @unique
+  id              Int        @id @default(autoincrement())
+  name            String     @unique
   duration        Int
   maxGroupSize    Int
-  difficulty      String   // e.g., "easy", "medium", "difficult"
-  ratingsAverage  Float    @default(4.5)
-  ratingsQuantity Int      @default(0)
+  difficulty      String // e.g., "easy", "medium", "difficult"
+  ratingsAverage  Float      @default(4.5)
+  ratingsQuantity Int        @default(0)
   price           Float
   priceDiscount   Float?
   summary         String
@@ -44,11 +43,18 @@ model Tour {
   imageCover      String
   images          String[] // PostgreSQL natively supports scalar string arrays
   startDates      DateTime[]
-  secretTour      Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  secretTour      Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // 👇 NEW: Added to support your rich nested JSON structural data
+  startLocation Json? // Stores the Miami GeoJSON object
+  locations     Json? // Stores the array of location objects
+
+  // 👇 NEW: MongoDB data holds an array of string User IDs for guides
+  guides String[]
 
   // Relationship fields connecting back to the User model
   createdByUserId Int?
-  createdBy       User?     @relation("UserTours", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  createdBy       User? @relation("UserTours", fields: [createdByUserId], references: [id], onDelete: Cascade)
 }
