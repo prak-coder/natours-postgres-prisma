@@ -63,12 +63,14 @@ class PrismaAPIFeatures {
   }
 
   paginate() {
-    const page = this.queryString.page * 1 || 1;
-    const limit = this.queryString.limit * 1 || 5;
-    const skip = (page - 1) * limit;
+    if (this.queryString.page || this.queryString.limit) {
+      const page = this.queryString.page * 1 || 1;
+      const limit = this.queryString.limit * 1 || 100;
+      const skip = (page - 1) * limit;
 
-    this.queryArgs.skip = skip;
-    this.queryArgs.take = limit;
+      this.queryArgs.skip = (page - 1) * limit;
+      this.queryArgs.take = limit;
+    }
 
     return this;
   }
